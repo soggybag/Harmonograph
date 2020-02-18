@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Harmonogram</title>
+    <style>
+      canvas {
+        border: 1px solid;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas 
+      width="1600" 
+      height="1600"
+      style="width:800px; height:800px;"></canvas>
+    <pre id="display"></pre>
+
+    <script>
+      // TODO: input to set parameters
+      // TODO: Capture image
+      // TODO: Color and opacity
+      // TODO: Post to social media share
+
+      const display = document.querySelector('#display')
+      const canvas = document.querySelector('canvas')
+      const ctx = canvas.getContext('2d')
+
+      class Wobble {
+        constructor(x = 0, y = 0, speedX = 0.01, speedY = 0.01, rangeX = 100, rangeY, damp = 0.999, offsetX = 0, offsetY = 0) {
+          this.x = x
+          this.y = y 
+          this.speedX = speedX
+          this.speedY = speedY
+          this.rangeX = rangeX
+          this.rangeY = rangeY
+          this.damp = damp
+          this.offsetX = offsetX
+          this.offsetY = offsetY
+        }
+
+        update(cycle) {
+          this.rangeX = this.rangeX * this.damp
+          this.rangeY = this.rangeY * this.damp
+          this.x = Math.cos(this.speedX * cycle) * this.rangeX + this.offsetX
+          this.y = Math.sin(this.speedY * cycle) * this.rangeY + this.offsetY
+        }
+
+      }
+
+
+
+      class Drawing {
+        constructor(id, wobbleCount = 2) {
+          this.count = 0
+          this.cycles = 10000
+          this.canvas = document.querySelector(id)
+          this.ctx = this.canvas.getContext('2d')
+          this.centerX = this.canvas.width / 2
+          this.centerY = this.canvas.height / 2
+
+          this.wobbles = []
+
+          const speedRange = 0.3
+          const rangeRange = 400
+          const rangeMin = 10
+
+          for (let i = 0; i < wobbleCount; i += 1) {
+            const x = 0 
+            const y = 0
+            
+            let speedX = Math.random() * speedRange 
+            let speedY = Math.random() * speedRange * i
+            let rangeX = Math.random() * rangeRange + rangeMin
+            let rangeY = Math.random() * rangeRange + rangeMin
+            const offsetX = 0 // Math.random() * rangeRange - (rangeRange / 2)
+            const offsetY = 0 // Math.random() * rangeRange - (rangeRange / 2)
+
+            const damp = 1 - Math.random() * 0.0002
+
+             // this.wobbles.push(new Wobble())
+             this.wobbles.push(new Wobble(x, y, speedX, speedX, rangeX, rangeY, damp, offsetX, offsetY))
+ 
+            display.innerHTML += `
+x:${x}, 
+y:${y}, 
+speedX:${speedX}, 
+speedY:${speedY}, 
+range:${rangeX} ${rangeY}, 
+damp:${damp}`
+
+          }
+
+          this.draw()
+        }
+
+        // --------------------------------------------
+
+        draw() {
+          let x = 0
+          let y = 0
+
+          this.wobbles.forEach((wobble, i) => {
+            wobble.update(this.count)
+            x += wobble.x 
+            y += wobble.y
+          })
+
+          if (this.count === 0) {
+            this.ctx.beginPath()
+            this.ctx.moveTo(x + this.centerX, y + this.centerY)
+          } else {
+            this.ctx.lineTo(x + this.centerX, y + this.centerY)
+          }
+
+          // this.ctx.beginPath()
+          
+          this.ctx.strokeStyle = 'red'
+          this.ctx.stroke()
+
+          this.count += 1
+
+          if (this.count > this.cycles) {
+            display.innerHTML = 'DONE: \n' + display.innerHTML
+            return
+          }
+
+          requestAnimationFrame(() => {
+            this.draw()
+          })
+        }
+      }
+
+      new Drawing('canvas')
+    </script>
+  </body>
+</html>

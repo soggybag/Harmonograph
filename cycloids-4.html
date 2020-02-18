@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title></title>
+    <style>
+      canvas {
+        border: 1px solid;
+      }
+      body {
+        background-color: #000;
+        color: #fff;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas 
+      width=1600   
+      height=1600
+      style = 'width:800px; height:800px;'
+      id='cv'></canvas>
+    <pre id="display"></pre>
+
+    <script>
+      const display = document.querySelector('#display')
+      const canvas = document.querySelector('canvas')
+      const ctx = canvas.getContext('2d')
+
+      class Wobble {
+        constructor(radiusX, radiusY, speedX, speedY, offsetX = 0, offsetY = 0) {
+          this.radiusX = radiusX
+          this.radiusY = radiusY
+          this.speedX = speedX
+          this.speedY = speedY
+          this.offsetX = offsetX
+          this.offsetY = offsetY
+        }
+      }
+
+      class Drawing {
+        constructor(id, wobbleCount = 3) {
+          this.count = 0
+          this.cycles = 10000
+          this.canvas = document.querySelector(id)
+          this.ctx = this.canvas.getContext('2d')
+          this.centerX = this.canvas.width / 2
+          this.centerY = this.canvas.height / 2
+
+          this.x = this.centerX
+          this.y = this.centerY
+          this.previousX = this.x
+          this.previousY = this.y
+
+          this.wobbles = []
+
+          // Create Wobbles
+          const t = Math.random() * 0.1
+          for (let i = 0; i < wobbleCount; i += 1) {
+            const r = 300
+            const m = 1
+            const radiusX = Math.random() * r + m 
+            const radiusY = Math.random() * r + m
+            // const speedX = t * (i + 2) // * Math.random() // * (i + 1)
+            // const speedY = t * (i + 2)  // * Math.random() // * (i + 1)
+            const speedX = Math.random() * 0.01 * (i + 1)
+            const speedY = Math.random() * 0.01 * (i + 1)
+            // const speedY = speedX * 2 // 0.05 * Math.random()
+            this.wobbles.push(new Wobble(radiusX, radiusY, speedX, speedY, i * 10, i * -10))
+
+            display.innerHTML += `
+            wobble: ${i}
+radiusX = ${radiusX} 
+radiusY = ${radiusY}, 
+speedX = ${speedX} 
+speedY = ${speedY}`
+
+
+
+          }
+
+          this.draw()
+        }
+
+        // --------------------------------
+        // Draw stuff
+        draw() {
+
+          this.wobbles.forEach((wobble, i) => {
+            const tx = this.count * wobble.speedX
+            const ty = this.count * wobble.speedY
+
+            if (i === 0) {
+              this.x = Math.cos(tx) * wobble.radiusX + this.centerX + wobble.offsetX
+              this.y = Math.sin(ty) * wobble.radiusY + this.centerY + wobble.offsetY
+            } else {
+              this.x += Math.cos(tx) * wobble.radiusX
+              this.y += Math.sin(ty) * wobble.radiusY
+            }
+          })
+
+          this.ctx.beginPath()
+
+          if (this.count === 0) {
+            this.ctx.moveTo(this.x, this.y)
+          } else {
+            this.ctx.moveTo(this.previousX, this.previousY)
+            this.ctx.lineTo(this.x, this.y)
+          }
+
+          this.previousX = this.x
+          this.previousY = this.y
+
+          // const a = this.count % 100 / 100
+          const a = 1.0 // Math.abs(Math.sin(this.count / 100))
+          // const h = this.count % 360
+          // const h = Math.abs(Math.sin(this.count / 100) * 360)
+          const h = 360 / this.cycles * this.count
+          const w = Math.abs(Math.cos(this.count / 100)) * 100
+          this.ctx.lineWidth = Math.abs(Math.sin(this.count / 200)) * 10
+          this.ctx.lineCap = 'round'
+          this.ctx.strokeStyle = `hsla(${h},100%,50%,${a})`
+          // this.ctx.strokeStyle = `red`
+          this.ctx.stroke()
+
+          this.count += 1
+
+          if (this.count > this.cycles) {
+            display.innerHTML += `
+DONE`
+            return
+          }
+
+          requestAnimationFrame(() => {
+            this.draw()
+          })
+        }
+      }
+
+      new Drawing('canvas')
+
+
+      /*
+
+      TODO: Stop Button
+      TODO: Start Button
+      TODO: set time and cycles
+      TODO: Save settings to local storage
+      TODO: Vary line weight
+      TODO: Vary color 
+      TODO: Vary Opacity
+      TODO: Save Canvas as image
+      TODO: Cavnas transparent background
+
+      // Convert canvas to image
+document.getElementById('btn-download').addEventListener("click", function(e) {
+    var canvas = document.querySelector('#my-canvas');
+
+    var dataURL = canvas.toDataURL("image/jpeg", 1.0);
+
+    downloadImage(dataURL, 'my-canvas.jpeg');
+});
+
+// Save | Download image
+function downloadImage(data, filename = 'untitled.jpeg') {
+    var a = document.createElement('a');
+    a.href = data;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+}
+      
+      Hi Def canvas 
+
+      <canvas          width=1000   height=1000
+        style = 'width:200px; height:200px;'     id='cv'>  
+      </canvas>
+
+      https://www.html5rocks.com/en/tutorials/canvas/hidpi/
+      
+      */
+    </script>
+  </body>
+</html>

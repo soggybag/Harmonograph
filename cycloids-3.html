@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title></title>
+    <style>
+      canvas {
+        border: 1px solid;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas 
+      width=1600   
+      height=1600
+      style = 'width:800px; height:800px;'
+      id='cv'></canvas>
+    <pre id="display"></pre>
+
+    <script>
+      const display = document.querySelector('#display')
+      const canvas = document.querySelector('canvas')
+      const ctx = canvas.getContext('2d')
+
+      class Wobble {
+        constructor(radius, speed) {
+          this.radius = radius
+          this.speed = speed
+        }
+      }
+
+      class Drawing {
+        constructor(id, wobbleCount = 23) {
+          this.count = 0
+          this.cycles = 10000
+          this.canvas = document.querySelector(id)
+          this.ctx = this.canvas.getContext('2d')
+          this.centerX = this.canvas.width / 2
+          this.centerY = this.canvas.height / 2
+
+          this.x = this.centerX
+          this.y = this.centerY / 2
+
+          this.wobbles = []
+
+          for (let i = 0; i < wobbleCount; i += 1) {
+            // const n = 100 / (i + 1) + 30
+            const u = Math.random()
+            const r = 800 / (i + 1)
+            // const r = (wobbleCount * 100) / (i + 0.2)
+            const n = Math.random() * r // + (r / 2)
+            const t = 0.04
+            const radius = Math.random() * n + 10
+            const speed = Math.random() * t + (i * 0.015)
+            this.wobbles.push(new Wobble(radius, speed))
+
+            display.innerHTML += `
+radius:${radius}, 
+speed:${speed}`
+
+          }
+
+          this.draw()
+        }
+
+        // --------------------------------
+        // Draw stuff
+        draw() {
+
+          this.count += 1
+
+          this.x = this.centerX
+          this.y = this.centerY
+
+          let previousX = this.centerX
+          let previousY = this.centerY
+
+          this.wobbles.forEach((wobble,) => {
+            const t = this.count * wobble.speed
+            this.x = Math.cos(t) * wobble.radius + previousX
+            this.y = Math.sin(t) * wobble.radius + previousY
+
+            previousX = this.x
+            previousY = this.y
+
+            if (this.count === 0) {
+              this.ctx.beginPath()
+              this.ctx.moveTo(this.x, this.y)
+            } else {
+              this.ctx.lineTo(this.x, this.y)
+            }
+
+            const a = this.count % 100 / 100
+            this.ctx.strokeStyle = `rgba(0,0,0,${a})`
+            this.ctx.stroke()
+
+          })
+
+
+          if (this.count > this.cycles) {
+            return
+          }
+
+          requestAnimationFrame(() => {
+            this.draw()
+          })
+        }
+      }
+
+      new Drawing('canvas')
+
+
+      /*
+
+      TODO: Stop Button
+      TODO: Start Button
+      TODO: set time and cycles
+      TODO: Save settings to local storage
+      TODO: Vary line weight
+      TODO: Vary color 
+      TODO: Vary Opacity
+      
+      Hi Def canvas 
+
+      <canvas          width=1000   height=1000
+        style = 'width:200px; height:200px;'     id='cv'>  
+      </canvas>
+
+      https://www.html5rocks.com/en/tutorials/canvas/hidpi/
+      
+      */
+    </script>
+  </body>
+</html>
