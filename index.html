@@ -6,33 +6,60 @@
       canvas {
         border: 1px solid;
       }
+
+      body > div {
+        display: flex;
+      }
+
+      body > div > div {
+        display: flex;
+        flex-direction: column;
+      }
     </style>
   </head>
   <body>
-    <canvas 
+    <div>
+      <canvas 
       width="1600" 
       height="1600"
       style="width:800px; height:800px;"></canvas>
-    <pre id="display"></pre>
+      <div>
+        <input type="range" >
+        <input type="range">
+        <pre id="display"></pre>
+      </div>
+    </div>
+    
 
     <script>
-      // TODO: input to set parameters
-      // TODO: Capture image
-      // TODO: Color and opacity
-      // TODO: Post to social media share
-
       const display = document.querySelector('#display')
       const canvas = document.querySelector('canvas')
       const ctx = canvas.getContext('2d')
 
+      class Wibble {
+        constructor(speed, phase, range, angle) {
+          this.speed = speed
+          this.phase = phase
+          this.range = range 
+          this.angle = angle
+        }
+
+        update(cycle) {
+          this.x = Math.sin(this.speed * cycle) * this.range
+          this.y = Math.cos(this.angle % Math.PI) * this.range
+        }
+      }
+
       class Wobble {
-        constructor(x = 0, y = 0, speedX = 0.01, speedY = 0.01, rangeX = 100, rangeY, damp = 0.999, offsetX = 0, offsetY = 0) {
+        constructor(x = 0, y = 0, speedX = 0.01, speedY = 0.01, rangeX = 100, rangeY, phaseX = 0, phaseY = 0,damp = 0.999, offsetX = 0, offsetY = 0) {
           this.x = x
-          this.y = y 
+          this.y = y
           this.speedX = speedX
           this.speedY = speedY
           this.rangeX = rangeX
           this.rangeY = rangeY
+          this.phaseX = phaseX
+          this.phaseY = phaseY
           this.damp = damp
           this.offsetX = offsetX
           this.offsetY = offsetY
@@ -41,10 +68,9 @@
         update(cycle) {
           this.rangeX = this.rangeX * this.damp
           this.rangeY = this.rangeY * this.damp
-          this.x = Math.cos(this.speedX * cycle) * this.rangeX + this.offsetX
-          this.y = Math.sin(this.speedY * cycle) * this.rangeY + this.offsetY
+          this.x = Math.cos(this.speedX * cycle + this.phaseX) * this.rangeX + this.offsetX
+          this.y = Math.sin(this.speedY * cycle + this.phaseY) * this.rangeY + this.offsetY
         }
-
       }
 
 
@@ -72,13 +98,15 @@
             let speedY = Math.random() * speedRange * i
             let rangeX = Math.random() * rangeRange + rangeMin
             let rangeY = Math.random() * rangeRange + rangeMin
+            let phaseX = Math.random() * Math.PI * 2
+            let phaseY = Math.random() * Math.PI * 2
             const offsetX = 0 // Math.random() * rangeRange - (rangeRange / 2)
             const offsetY = 0 // Math.random() * rangeRange - (rangeRange / 2)
 
-            const damp = 1 - Math.random() * 0.0002
+            const damp = 1 - Math.random() * 0.0004
 
-             // this.wobbles.push(new Wobble())
-             this.wobbles.push(new Wobble(x, y, speedX, speedX, rangeX, rangeY, damp, offsetX, offsetY))
+            // this.wobbles.push(new Wibble(speedX, phaseX, rangeX, phaseY))
+             this.wobbles.push(new Wobble(x, y, speedX, speedX, rangeX, rangeY, phaseX, phaseY, damp, offsetX, offsetY))
  
             display.innerHTML += `
 x:${x}, 
@@ -86,7 +114,9 @@ y:${y},
 speedX:${speedX}, 
 speedY:${speedY}, 
 range:${rangeX} ${rangeY}, 
-damp:${damp}`
+damp:${damp}
+phaseX:${phaseX}
+phaseY:${phaseY}`
 
           }
 
@@ -105,11 +135,17 @@ damp:${damp}`
             y += wobble.y
           })
 
+          this.ctx.beginPath()
+
           if (this.count === 0) {
-            this.ctx.beginPath()
             this.ctx.moveTo(x + this.centerX, y + this.centerY)
+            this.prevX = x
+            this.prevY = y
           } else {
+            this.ctx.lineTo(this.prevX + this.centerX, this.prevY + this.centerY)
             this.ctx.lineTo(x + this.centerX, y + this.centerY)
+            this.prevX = x
+            this.prevY = y
           }
 
           // this.ctx.beginPath()
@@ -130,7 +166,7 @@ damp:${damp}`
         }
       }
 
-      new Drawing('canvas')
+      const drawing = new Drawing('canvas')
     </script>
   </body>
 </html>

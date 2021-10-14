@@ -37,7 +37,7 @@
       }
 
       class Drawing {
-        constructor(id, wobbleCount = 3) {
+        constructor(id, wobbleCount = 2) {
           this.count = 0
           this.cycles = 10000
           this.canvas = document.querySelector(id)
@@ -110,12 +110,12 @@ speedY = ${speedY}`
           this.previousY = this.y
 
           // const a = this.count % 100 / 100
-          const a = 1.0 // Math.abs(Math.sin(this.count / 100))
+          const a = 0.025 // Math.abs(Math.sin(this.count / 10))
           // const h = this.count % 360
           // const h = Math.abs(Math.sin(this.count / 100) * 360)
           const h = 360 / this.cycles * this.count
           const w = Math.abs(Math.cos(this.count / 100)) * 100
-          this.ctx.lineWidth = Math.abs(Math.sin(this.count / 200)) * 10
+          this.ctx.lineWidth = Math.abs(Math.sin(this.count / 200)) * 40
           this.ctx.lineCap = 'round'
           this.ctx.strokeStyle = `hsla(${h},100%,50%,${a})`
           // this.ctx.strokeStyle = `red`
